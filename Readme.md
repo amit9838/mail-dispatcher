@@ -46,3 +46,26 @@ To run the application directly from the source code, ensure your local SMTP ser
 go run .
 ```
 This will trigger the producer to read `emails.csv` and the worker pool to dispatch the emails concurrently.
+
+## Checklist for Industry Standards
+To make this application production-ready and adhere to industry standards, the following improvements should be considered. They are categorized by difficulty:
+
+### Easy (Quick Wins)
+- [ ] **Linting & Formatting**: Introduce tools like `golangci-lint` and `gofmt` to enforce standard coding styles and catch common errors early.
+- [ ] **Configuration Management**: Externalize configurations (SMTP host, port, worker count, sender email) using environment variables (e.g., `.env`) or command-line flags instead of hardcoding them.
+- [ ] **Template Caching**: Parse the email template (`email.tmpl`) once at startup rather than on every email dispatch to significantly improve CPU utilization and latency.
+- [ ] **Input Validation**: Add structural validation to ensure recipient email addresses are well-formed before attempting delivery.
+- [ ] **Modularization**: Organize code into separate sub-packages (e.g., `internal/worker`, `internal/producer`) instead of keeping everything in `main.go` to improve maintainability.
+
+### Medium (Architecture & Stability)
+- [ ] **Structured Logging**: Replace standard `fmt.Printf` with a structured logging library (like `log/slog`, `logrus`, or `zap`) for better observability.
+- [ ] **Memory-Efficient CSV Processing**: Refactor `producer.go` to stream the CSV file line-by-line (`r.Read()`) instead of loading all records into memory at once (`r.ReadAll()`), allowing it to handle massive files.
+- [ ] **Context & Graceful Shutdown**: Implement `context.Context` to handle OS signals (SIGTERM, SIGINT) and ensure workers can finish processing inflight emails before shutting down gracefully.
+- [ ] **Containerization & Tooling**: Create a `Dockerfile`, `docker-compose.yml`, and a `Makefile` to streamline deployment, local environment setup, and developer onboarding.
+- [ ] **Testing & CI/CD**: Add robust unit tests, mock SMTP handlers for integration tests, and a CI/CD pipeline (e.g., GitHub Actions) for automated verification.
+
+### Hard (Scalability & Resilience)
+- [ ] **Connection Pooling**: Use a persistent SMTP connection pool (e.g., maintaining `net/smtp.Client` instances) instead of opening and closing a new TCP connection for every single email via `smtp.SendMail`.
+- [ ] **Error Handling & Retries**: Add a robust retry mechanism (e.g., exponential backoff) and a persistent dead-letter queue (DLQ) for tracking and re-processing emails that fail to send.
+- [ ] **Rate Limiting**: Implement a rate limiter to respect upstream SMTP server sending limits and avoid being blocked or throttled.
+- [ ] **Metrics & Monitoring**: Expose a lightweight HTTP server to serve Prometheus metrics (e.g., tracking total successful, failed, and queued emails) or health checks.
