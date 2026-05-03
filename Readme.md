@@ -1,7 +1,7 @@
-# Mailchamp
+# Mail Dispatcher
 
 ## Introduction
-Mailchamp is a lightweight, concurrent Go application designed to process and send bulk emails. It reads recipient data from a CSV file and utilizes a worker pool to send templated emails to an SMTP server concurrently.
+Mail Dispatcher is a lightweight, concurrent Go application designed to process and send bulk emails. It reads recipient data from a CSV file and utilizes a worker pool to send templated emails to an SMTP server concurrently.
 
 ## Project Architecture
 The application uses a **Producer-Consumer** pattern to achieve high concurrency and performance:
@@ -11,7 +11,7 @@ The application uses a **Producer-Consumer** pattern to achieve high concurrency
 
 ## Directory Structure
 ```text
-Mailchamp/
+mail-dispatcher/
 ├── Readme.md      # Project documentation
 ├── consumer.go    # Defines the worker logic (emailWorker) for sending emails
 ├── email.tmpl     # Go template for formatting the email headers and body
@@ -30,9 +30,9 @@ To test the email dispatching locally without sending actual emails, you need a 
 ## Build
 To compile the application into a standalone executable, run:
 ```bash
-go build -o mailchamp .
+go build -o mail-dispatcher .
 ```
-This will generate an executable binary named `mailchamp` in the root directory.
+This will generate an executable binary named `mail-dispatcher` in the root directory.
 
 ## Test
 To run the project tests (if any are added to `*_test.go` files), use the standard Go test command:
@@ -47,11 +47,10 @@ go run .
 ```
 This will trigger the producer to read `emails.csv` and the worker pool to dispatch the emails concurrently.
 
-## Checklist for Industry Standards
+## Checklist for improvements
 To make this application production-ready and adhere to industry standards, the following improvements should be considered. They are categorized by difficulty:
 
 ### Easy (Quick Wins)
-- [ ] **Linting & Formatting**: Introduce tools like `golangci-lint` and `gofmt` to enforce standard coding styles and catch common errors early.
 - [ ] **Configuration Management**: Externalize configurations (SMTP host, port, worker count, sender email) using environment variables (e.g., `.env`) or command-line flags instead of hardcoding them.
 - [ ] **Template Caching**: Parse the email template (`email.tmpl`) once at startup rather than on every email dispatch to significantly improve CPU utilization and latency.
 - [ ] **Input Validation**: Add structural validation to ensure recipient email addresses are well-formed before attempting delivery.
