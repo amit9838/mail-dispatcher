@@ -1,11 +1,16 @@
-package main
+package internal
 
 import (
 	"encoding/csv"
 	"os"
 )
 
-func loadRecipient(filePath string, ch chan Recipient) error {
+type Recipient struct {
+	Name  string
+	Email string
+}
+
+func LoadRecipient(filePath string, ch chan Recipient) error {
 	defer close(ch)
 
 	f, err := os.Open(filePath)

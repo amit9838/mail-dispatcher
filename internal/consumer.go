@@ -1,13 +1,15 @@
-package main
+package internal
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"net/smtp"
 	"sync"
 	"time"
 )
 
-func emailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
+func EmailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	smtpHost := "localhost"
@@ -15,9 +17,6 @@ func emailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
 
 	for recipient := range ch {
 		fmt.Printf("Emailing %d %s at %s\n", id, recipient.Name, recipient.Email)
-
-		// formattedMsg := fmt.Sprintf("To: %s\r\nSubject: Test Email\r\n\r\nHello %s,\r\nThis is a test email\r\n", recipient.Email, recipient.Name)
-		// msg := []byte(formattedMsg)
 
 		msg, err := executeTemplate(recipient)
 		fmt.Printf("Worker %d: Sending email to %s \n", id, recipient.Email)
@@ -38,4 +37,16 @@ func emailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
 
 		fmt.Printf("Worker %d: Email sent to %s\n", id, recipient.Email)
 	}
+}
+
+func executeTemplate(r Recipient) (string, error) {
+	t, err := template.ParseFiles("email.tmpl")
+	if err != nil {
+		return "", err
+	}
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, r); err != nil {
+		return "", err
+	}
+	return tpl.String(), nil
 }
